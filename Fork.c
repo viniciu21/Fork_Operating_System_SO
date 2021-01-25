@@ -8,7 +8,7 @@
 
 int main(){
 
-    pid_t pid[5] = {-1,-1,-1,-1,-1};
+    pid_t pid[4] = {-1,-1,-1,-1};
 
     sleep(14);
 
@@ -16,66 +16,73 @@ int main(){
 
     pid[0] = fork();
 
-    printf("PAI: processo filho #1 criado\n");
-
     if(pid[0] < 0){
         fprintf(stderr,"Erro ao criar processo filho #1");
         exit(-1);
-    } else if(pid[0] == 0){
-        //primeiro neto 26s
-        printf("Filho #1: (PID=%d)\n", getpid());
-        sleep(10);
-        pid[2] = fork();
-        printf("Filho #1: Criando neto #1\n");
-        wait(NULL);
     }else{
-        printf("PAI: processo filho #2 criado\n");
-        sleep(2);
-        //segundo filho 16s
-        pid[1] = fork();
-        if(pid[1] < 0){
-            fprintf(stderr,"Erro ao criar processo filho #2");
+        if(pid[0] == 0){
+            //primeiro neto 26s
+            printf("Filho #1: (PID=%d)\n", getpid());
+            printf("Filho #1: Criando neto #1\n");
+            sleep(10);
+            pid[2] = fork();
+            if(pid[2] < 0){
+                fprintf(stderr,"Erro ao criar processo neto #2");
+                exit(-1);
+            }else{
+                if(pid[2] == 0){
+                    // morte do primeito neto 38s
+                    sleep(8);
+                    pid_t filho1 = getppid();
+                    printf("Matando primeiro neto 38s\n");
+                    kill(getpid(),0);
+                    sleep(6);
+                    //morte do primeiro filho 44s
+                    printf("Matando primeiro filho 44s\n");
+                    kill(filho1,0);
+                    wait(NULL);
+                }
+            }
+            wait(NULL);
+        }else{
+            printf("Processo Filho #2 criado\n");
+            sleep(2);
+            //segundo filho 16s
+            pid[1] = fork();
+            if(pid[1] < 0){
+                fprintf(stderr,"Erro ao criar processo filho #2");
+            }else{
+                if(pid[1] == 0){
+                    printf("Filho #2: (PID=%d)\n", getpid());
+                    //segundo neto 30s
+                    printf("Filho #2: Criando neto #2\n");
+                    sleep(4);
+                    pid[3] = fork();
+                    if(pid[3] < 0){
+                        fprintf(stderr,"Erro ao criar processo neto #2");
+                        exit(-1);
+                    }else{
+                        if(pid[3] == 0){
+                            // morte do segundo neto 44s
+                            pid_t filho2 = getppid();
+                            printf("Matando segundo neto 44s\n");
+                            kill(getpid(),0);
+                            sleep(2);
+                            // morte do segundo filho 46s
+                            printf("Matando segundo filho 46s\n");
+                            kill(filho2,0);
+                            wait(NULL);
+                        }
+                    }
+                    wait(NULL);
+                }
+            } 
         }
-        wait(NULL);
-    }
-
-    if(pid[1] == 0){
-        printf("Filho #2: (PID=%d)\n", getpid());
-        //segundo neto 30s
-        sleep(4);
-        pid[3] = fork();
-        printf("Filho #2: Criando neto #2\n");
-        wait(NULL);
-    }
-
-    if(pid[2] == 0){
-        // morte do neto 38s
-        sleep(8);
-        pid_t filho1 = getppid();
-        printf("Matando primeiro neto 38s\n");
-        kill(getpid(),0);
-        sleep(6);
-        //morte do primeiro filho 44s
-        printf("Matando primeiro filho 44s\n");
-        kill(filho1,0);
-        wait(NULL);
-    }
-
-    if(pid[3] == 0){
-        // morte do segundo neto 44s
-        pid_t filho2 = getppid();
-        printf("Matando segundo neto 44s\n");
-        kill(getpid(),0);
-        sleep(2);
-        // morte do segundo filho 46s
-        printf("Matando segundo filho 46s\n");
-        kill(filho2,0);
-        wait(NULL);
-    }
-
-    sleep(14);
+    } 
 
     wait(NULL);
+
+    sleep(14);
     
     return 0;
 
