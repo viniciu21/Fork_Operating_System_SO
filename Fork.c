@@ -21,8 +21,6 @@ int main(){
 
     time_t start = time(NULL);
 
-    time_t tempo_de_morte;
-
     await(14);
 
     //primeiro filho 14s
