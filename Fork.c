@@ -19,13 +19,17 @@ int main(){
 
     pid_t filho1,filho2,neto1,neto2;
 
+    time_t start = time(NULL);
+
+    time_t tempo_de_morte;
+
     await(14);
 
     //primeiro filho 14s
 
-    filho1 = fork();
+    printf("PAI (PID=%d)\nProcesso Filho #1 criado tempo: %ld\n", getpid(),time(NULL)-start);
 
-    printf("PAI (PID=%d):Processo Filho #1 criado\n", getppid());
+    filho1 = fork();
 
     if(filho1 < 0){
         fprintf(stderr,"Erro ao criar processo filho #1");
@@ -34,7 +38,7 @@ int main(){
         if(filho1 > 0){
             //segundo filho 16s
             await(2);
-            printf("Processo Filho #2 criado\n");
+            printf("Processo Filho #2 criado tempo: %ld\n", time(NULL)-start);
             filho2 = fork();
             if(filho2 < 0){
                 fprintf(stderr,"Erro ao criar processo neto #2\n");
@@ -42,30 +46,31 @@ int main(){
             }else{
                 if(filho2 == 0){
                     //segundo neto 30s
-                    printf("Filho #2: Criando neto #2\n");
-                    await(4);
+                    await(14);
+                    printf("Filho #2(PID=%d)\tNeto #2 tempo: %ld\n",getpid(),time(NULL)-start);
                     neto2 = fork();
                     if(neto2 < 0){
                         fprintf(stderr,"Erro ao criar processo neto #2");
                         exit(-1);
                     }else{
                         if(neto2 == 0){
+                            // morte do segundo neto 48s.
                             await(18);
-                            // morte do segundo neto 44s
-                            printf("Matando segundo neto 44s\n");
-                            await(5);
-                            // morte do segundo filho 48s
-                            printf("Matando segundo filho 48s\n");
+                            printf("Neto #2(PID=%d)\ttempo de morte cronológico a partir do pai: %ld\n", getpid(),time(NULL)-start);
+                            exit(0);
+                        }else{
+                            await(16);
+                            // morte do segundo filho 30s, await(16+14)
+                            printf("Filho #2\t\ttempo de morte cronológico a partir do pai: %ld\n", time(NULL)-start);
+                            exit(0);
                         }
                     }
-                    wait(NULL);
                 }
             }
-            wait(NULL);
         }else{
             //primeiro neto 26s
-            printf("Filho #1: Criando neto #1\n");
-            await(10);
+            await(12);
+            printf("Filho #1(PID=%d)\tNeto #1 tempo: %ld \n",getpid(),time(NULL)-start);
             neto1 = fork();
             if(neto1 < 0){
                 fprintf(stderr,"Erro ao criar processo neto #1\n");
@@ -74,19 +79,27 @@ int main(){
                 if(neto1 == 0){
                     // morte do primeito neto 38s
                     await(12);
-                    printf("Matando primeiro neto 38s\n");
-                    await(6);
+                    printf("Neto #1(PID=%d)\ttempo de morte cronológico a partir do pai: %ld\n", getpid(),time(NULL)-start);
+                    exit(0);
+                }else{
                     //morte do primeiro filho 44s
-                    printf("Matando primeiro filho 44s\n");
+                    await(18);
+                    // morre com 30s, await(18+12)
+                    wait(NULL);
+                    printf("Filho #1\t\ttempo de morte cronológico a partir do pai: %ld\n", time(NULL)-start);
+                    exit(0);
                 }
             }
-            wait(NULL);
         }
     }
 
     wait(NULL);
 
-    await(14);
+    await(16);
+
+    if(filho1>0){
+        printf("Tempo de morte do pai: %ld\n", time(NULL) - start);
+    }
     
     return 0;
 
