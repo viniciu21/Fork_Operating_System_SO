@@ -1,0 +1,5 @@
+Neto 1, tempo vivido: 12.0
+Filho 1, tempo vivido: 30.0
+Filho 2, tempo vivido: 30.0
+Neto 2, tempo vivido: 18.0
+Pai, tempo vivido: 60.0
